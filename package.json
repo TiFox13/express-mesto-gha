@@ -165,14 +165,15 @@
   },
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "lint": "npx eslint"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TiFox13/express-mesto-gha.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "TiFox",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/TiFox13/exprmesto-gha/issues"
