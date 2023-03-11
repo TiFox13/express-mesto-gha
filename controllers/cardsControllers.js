@@ -20,7 +20,7 @@ function createCard(req, res) {
     link: req.body.link,
     owner: req.user._id,  //ID пользователя. доступный благодаря мидлвэру в app.js
   })
-    .then(card => res.status(200).send(req.body))
+    .then(card => res.status(200).send(card))
     .catch(err => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: `Переданы некорректные данные при создании карточки: ${err}` });
@@ -55,7 +55,7 @@ function putLike(req, res) {
         return;
       }
     })
-    .then(card => res.send(card))
+    .then(card => res.status(200).send(card))
     .catch(err => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: `Переданы некорректные данные для постановки/снятии лайка: ${err}` });
@@ -78,7 +78,7 @@ function deleteLike(req, res) {
         return;
       }
     })
-    .then(card => res.send(card))
+    .then(card => res.status(200).send(card))
     .catch(err => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: `Переданы некорректные данные для постановки/снятии лайка: ${err}` });

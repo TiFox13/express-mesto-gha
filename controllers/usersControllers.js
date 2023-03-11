@@ -17,14 +17,20 @@ function getUser(req, res) {
       }
     })
     .then(user => res.status(200).send(user))
-    .catch((err) => {
-      res.status(500).send({ message: `На сервере произошла ошибка:: ${err}` });
+    .catch(err => {
+      if (err.name === 'ValidationError') {
+        res.status(400).send({ message: `Переданы некорректные данные при обновлении профиля: ${err}` });
+        return;
+      } else {
+        res.status(500).send({ message: `На сервере произошла ошибка: ${err}` });
+      }
     })
 }
 
 function createUser(req, res) {
-  UserSchema.create({ ...req.body })
-    .then(user => res.status(200).send(user))
+  const { name, about, avatar } = req.body;
+  UserSchema.create({name, about, avatar})
+    .then((user) => res.status(200).send(user))
     .catch(err => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: `Переданы некорректные данные при создании пользователя: ${err}` });
