@@ -43,10 +43,8 @@ function deleteCard(req, res) {
         res.send({data: card})
     })
     .catch(err => res.status(500).send({ message: `На сервере произошла ошибка: ${err}` }))
-}
 
-
-
+  }
 
 function putLike(req, res) {
   CardSchema.findByIdAndUpdate(
