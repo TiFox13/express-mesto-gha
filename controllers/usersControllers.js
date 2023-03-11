@@ -2,7 +2,13 @@ const UserSchema = require('../models/user');
 
 function getUsers(req, res) {
   return UserSchema.find({})
-    .then(users => res.status(200).send(users))
+  .then((users) => {
+    if (users.length === 0) {
+      res.status(404).send({ message: "Пользователи не найдены" });
+      return;
+    }
+    res.status(200).send(users);
+  })
     .catch((err) => {
       res.status(500).send({ message: `На сервере произошла ошибка: ${err}` });
     })
@@ -12,14 +18,14 @@ function getUser(req, res) {
   UserSchema.findById(req.body._id)
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: `Пользователь с указанным _id не найден: ${err}` });
+        res.status(400).send({ message: `Пользователь с указанным _id не найден: ${err}` });
         return;
       }
+      res.status(200).send(user)
     })
-    .then(user => res.status(200).send(user))
-    .catch(err => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: `Переданы некорректные данные при обновлении профиля: ${err}` });
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(404).send({ message: `Переданы некорректные данные при обновлении профиля: ${err}` });
         return;
       } else {
         res.status(500).send({ message: `На сервере произошла ошибка: ${err}` });
@@ -30,6 +36,7 @@ function getUser(req, res) {
 function createUser(req, res) {
   const { name, about, avatar } = req.body;
   UserSchema.create({name, about, avatar})
+
     .then((user) => res.status(200).send(user))
     .catch(err => {
       if (err.name === 'ValidationError') {
@@ -56,8 +63,8 @@ function patchUserInfo(req, res) {
         return;
       }
     })
-    .then(user => res.send(req.body))
-    .catch(err => {
+    .then((user) => res.send(req.body))
+    .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(400).send({ message: `Переданы некорректные данные при обновлении профиля: ${err}` });
         return;
