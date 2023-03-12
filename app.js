@@ -15,7 +15,7 @@ mongoose.connect('mongodb://0.0.0.0:27017/mestodb', {
 
 const app = express();
 
-app.use(express.static(path.join((__dirname, ''))));
+// app.use(express.static(path.join((__dirname, ''))));   //можно удалить. статические файлы не юзаютс в проекте
 app.use(bodyParse.json())
 app.use(bodyParse.urlencoded({ extended: true }))
 
@@ -28,6 +28,10 @@ app.use((req, res, next) => {
 
 app.use(usersRouter);
 app.use(cardsRouter);
+
+app.use((req, res) => {
+  res.status(404).send({ message: "Страницы по данному адресу не существует" });
+});
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`)
