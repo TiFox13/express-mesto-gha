@@ -6,72 +6,68 @@ const generalErrorCode = 500;
 
 function getUsers(req, res) {
   return UserSchema.find({})
-  .then((users) => {
-    res.send(users);
-  })
-    .catch((err) => {
-      res.status(generalErrorCode).send({ message: `На сервере произошла ошибка` });
+    .then((users) => {
+      res.send(users);
     })
-};
+    .catch(() => {
+      res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка' });
+    });
+}
 
 function getUser(req, res) {
   UserSchema.findById(req.body._id)
     .then((user) => {
       if (!user) {
-        res.status(validationErrorCode).send({ message: `Пользователь с указанным _id не найден` });
+        res.status(validationErrorCode).send({ message: 'Пользователь с указанным _id не найден' });
         return;
       }
-      res.send(user)
+      res.send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(сastErrorCode).send({ message: `Переданы некорректные данные _id пользователя` });
-        return;
+        res.status(сastErrorCode).send({ message: 'Переданы некорректные данные _id пользователя' });
       } else {
-        res.status(generalErrorCode).send({ message: `На сервере произошла ошибка` });
+        res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка' });
       }
-    })
+    });
 }
 
 function createUser(req, res) {
   const { name, about, avatar } = req.body;
-  UserSchema.create({name, about, avatar})
+  UserSchema.create({ name, about, avatar })
 
     .then((user) => res.send(user))
-    .catch(err => {
+    .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(сastErrorCode).send({ message: `Переданы некорректные данные при создании пользователя` });
-        return;
+        res.status(сastErrorCode).send({ message: 'Переданы некорректные данные при создании пользователя' });
       } else {
-        res.status(generalErrorCode).send({ message: `На сервере произошла ошибка` });
+        res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка' });
       }
     });
-};
+}
 
 function patchUserInfo(req, res) {
   UserSchema.findByIdAndUpdate(
     req.user._id,
     {
       name: req.body.name,
-      about: req.body.about
+      about: req.body.about,
     },
     { new: true },
   )
     .then((user) => {
       if (!user) {
-        res.status(validationErrorCode).send({ message: `Пользователь с указанным _id не найден` });
-        return;
+        res.status(validationErrorCode).send({ message: 'Пользователь с указанным _id не найден' });
       }
     })
-    .then((user) => res.send(req.body))
+    .then(() => res.send(req.body))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(сastErrorCode).send({ message: `Переданы некорректные данные при обновлении профиля` });
-        return;
+        res.status(сastErrorCode).send({ message: 'Переданы некорректные данные при обновлении профиля' });
       } else {
-        res.status(generalErrorCode).send({ message: `На сервере произошла ошибка` });
+        res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка' });
       }
-    })
+    });
 }
 
 function pathAvatar(req, res) {
@@ -82,19 +78,17 @@ function pathAvatar(req, res) {
   )
     .then((user) => {
       if (!user) {
-        res.status(validationErrorCode).send({ message: `Пользователь с указанным _id не найден` });
-        return;
+        res.status(validationErrorCode).send({ message: 'Пользователь с указанным _id не найден' });
       }
     })
-    .then(user => res.send(req.body))
-    .catch(err => {
+    .then(() => res.send(req.body))
+    .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(сastErrorCode).send({ message: `Переданы некорректные данные при обновлении аватара` });
-        return;
+        res.status(сastErrorCode).send({ message: 'Переданы некорректные данные при обновлении аватара' });
       } else {
-        res.status(generalErrorCode).send({ message: `На сервере произошла ошибка` });
+        res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка' });
       }
-    })
+    });
 }
 
 module.exports = {
@@ -103,4 +97,4 @@ module.exports = {
   createUser,
   patchUserInfo,
   pathAvatar,
-}
+};

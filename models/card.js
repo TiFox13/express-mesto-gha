@@ -12,11 +12,11 @@ const cardSchema = new mongoose.Schema({
     reguired: true,
   },
   owner: {
-    type: mongoose.Schema.Types.ObjectId, //ссылка на модель автора карточки, тип ObjectId, обязательное поле;
+    type: mongoose.Schema.Types.ObjectId,
     reguired: true,
   },
   likes: [{
-    type: mongoose.Schema.Types.ObjectId,    //список лайкнувших пост пользователей, массив ObjectId, по умолчанию — пустой массив (поле default);
+    type: mongoose.Schema.Types.ObjectId,
     default: [],
   }],
   createdAt: {
@@ -24,6 +24,5 @@ const cardSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
-
 
 module.exports = mongoose.model('card', cardSchema);

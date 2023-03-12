@@ -4,53 +4,47 @@ const validationErrorCode = 404;
 const сastErrorCode = 400;
 const generalErrorCode = 500;
 
-
 function getCards(req, res) {
   return CardSchema.find({})
-    .then(cards => res.send(cards))
-    .catch(err => {
-        res.status(generalErrorCode).send({ message: `На сервере произошла ошибка` });
-      });
-};
-
+    .then((cards) => res.send(cards))
+    .catch(() => {
+      res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка' });
+    });
+}
 
 function createCard(req, res) {
   CardSchema.create({
     name: req.body.name,
     link: req.body.link,
-    owner: req.user._id,  //ID пользователя. доступный благодаря мидлвэру в app.js
+    owner: req.user._id, // ID пользователя. доступный благодаря мидлвэру в app.js
   })
-    .then(card => res.send(card))
-    .catch(err => {
+    .then((card) => res.send(card))
+    .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(сastErrorCode).send({ message: `Переданы некорректные данные при создании карточки: ` });
-        return;
+        res.status(сastErrorCode).send({ message: 'Переданы некорректные данные при создании карточки: ' });
       } else {
-        res.status(generalErrorCode).send({ message: `На сервере произошла ошибка` });
+        res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка' });
       }
     });
 }
 
-
 function deleteCard(req, res) {
-
   CardSchema.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
-        res.status(validationErrorCode).send({ message: `Карточка с указанным _id не найдена: ` });
+        res.status(validationErrorCode).send({ message: 'Карточка с указанным _id не найдена: ' });
         return;
       }
-        res.send({data: card})
+      res.send({ data: card });
     })
-    .catch(err => {
+    .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(сastErrorCode).send({ message: `Переданы некорректные данные _id пользователя` });
-        return;
+        res.status(сastErrorCode).send({ message: 'Переданы некорректные данные _id пользователя' });
       } else {
-        res.status(generalErrorCode).send({ message: `На сервере произошла ошибка` });
+        res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка' });
       }
-    })
-  }
+    });
+}
 
 function putLike(req, res) {
   CardSchema.findByIdAndUpdate(
@@ -59,18 +53,17 @@ function putLike(req, res) {
     { new: true },
   )
     .then((card) => {
-      if(!card) {
-        res.status(validationErrorCode).send({ message: `Переданы некорректные данные для постановки/снятии лайка: ` })
+      if (!card) {
+        res.status(validationErrorCode).send({ message: 'Переданы некорректные данные для постановки/снятии лайка: ' });
         return;
       }
-    res.send(card)
+      res.send(card);
     })
-    .catch(err => {
+    .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(сastErrorCode).send({ message: `Передан несуществующий _id карточки: ` })
-        return;
+        res.status(сastErrorCode).send({ message: 'Передан несуществующий _id карточки: ' });
       } else {
-        res.status(generalErrorCode).send({ message: `На сервере произошла ошибка: ` });
+        res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка: ' });
       }
     });
 }
@@ -83,23 +76,19 @@ function deleteLike(req, res) {
   )
     .then((card) => {
       if (!card) {
-        res.status(validationErrorCode).send({ message: `Переданы некорректные данные для постановки/снятии лайка: ` })
+        res.status(validationErrorCode).send({ message: 'Переданы некорректные данные для постановки/снятии лайка: ' });
         return;
       }
-      res.send(card)
+      res.send(card);
     })
-    .catch(err => {
+    .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(сastErrorCode).send({ message: `Передан несуществующий _id карточки: ` });
-        return;
+        res.status(сastErrorCode).send({ message: 'Передан несуществующий _id карточки: ' });
       } else {
-        res.status(generalErrorCode).send({ message: `На сервере произошла ошибка: ` });
+        res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка: ' });
       }
     });
-
 }
-
-
 
 module.exports = {
   getCards,
@@ -107,4 +96,4 @@ module.exports = {
   deleteCard,
   putLike,
   deleteLike,
-}
+};
