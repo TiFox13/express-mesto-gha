@@ -18,13 +18,15 @@ function createCard(req, res) {
     link: req.body.link,
     owner: req.user._id, // ID пользователя. доступный благодаря мидлвэру в app.js
   })
-    .then((card) => res.send(card))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(сastErrorCode).send({ message: 'Переданы некорректные данные при создании карточки: ' });
-      } else {
-        res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка' });
+    .then((card) => {
+      if (name === undefined || link === undefined || owner === undefined) {
+        res.status(validationErrorCode).send({ message: 'Переданы некорректные данные при создании карточки' });
+        return
       }
+      res.send(card)
+    })
+    .catch((err) => {
+        res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка' });
     });
 }
 
@@ -32,7 +34,7 @@ function deleteCard(req, res) {
   CardSchema.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
-        res.status(validationErrorCode).send({ message: 'Карточка с указанным _id не найдена: ' });
+        res.status(validationErrorCode).send({ message: 'Карточка с указанным _id не найдена' });
         return;
       }
       res.send({ data: card });
@@ -54,16 +56,16 @@ function putLike(req, res) {
   )
     .then((card) => {
       if (!card) {
-        res.status(validationErrorCode).send({ message: 'Переданы некорректные данные для постановки/снятии лайка: ' });
+        res.status(validationErrorCode).send({ message: 'Переданы некорректные данные для постановки/снятии лайка' });
         return;
       }
       res.send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(сastErrorCode).send({ message: 'Передан несуществующий _id карточки: ' });
+        res.status(сastErrorCode).send({ message: 'Передан несуществующий _id карточки' });
       } else {
-        res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка: ' });
+        res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка' });
       }
     });
 }
@@ -76,16 +78,16 @@ function deleteLike(req, res) {
   )
     .then((card) => {
       if (!card) {
-        res.status(validationErrorCode).send({ message: 'Переданы некорректные данные для постановки/снятии лайка: ' });
+        res.status(validationErrorCode).send({ message: 'Переданы некорректные данные для постановки/снятии лайка' });
         return;
       }
       res.send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(сastErrorCode).send({ message: 'Передан несуществующий _id карточки: ' });
+        res.status(сastErrorCode).send({ message: 'Передан несуществующий _id карточки' });
       } else {
-        res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка: ' });
+        res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка' });
       }
     });
 }

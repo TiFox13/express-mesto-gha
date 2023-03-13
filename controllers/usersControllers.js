@@ -34,15 +34,18 @@ function getUser(req, res) {
 
 function createUser(req, res) {
   const { name, about, avatar } = req.body;
-  UserSchema.create({ name, about, avatar })
 
-    .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(сastErrorCode).send({ message: 'Переданы некорректные данные при создании пользователя' });
-      } else {
-        res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка' });
+  UserSchema.create({ name, about, avatar })
+    .then((user) => {
+      if (name === undefined || about === undefined || avatar === undefined) {
+        res.status(validationErrorCode).send({ message: 'Переданы некорректные данные при создании пользователя' });
+        return
       }
+      res.send(user)
+    })
+
+    .catch((err) => {
+        res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка' });
     });
 }
 
