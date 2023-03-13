@@ -13,20 +13,25 @@ function getCards(req, res) {
 }
 
 function createCard(req, res) {
+  const { name, link } = req.body;
   CardSchema.create({
     name: req.body.name,
     link: req.body.link,
     owner: req.user._id, // ID пользователя. доступный благодаря мидлвэру в app.js
   })
     .then((card) => {
-      if (name === undefined || link === undefined || owner === undefined) {
-        res.status(validationErrorCode).send({ message: 'Переданы некорректные данные при создании карточки' });
-        return
+      if (name === undefined || link === undefined) {
+        res.status(сastErrorCode).send({ message: 'Переданы некорректные данные при создании карточки' });
+        return;
       }
-      res.send(card)
+      res.send(card);
     })
     .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(сastErrorCode).send({ message: 'Переданы некорректные данные при обновлении профиля' });
+      } else {
         res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка' });
+      }
     });
 }
 
