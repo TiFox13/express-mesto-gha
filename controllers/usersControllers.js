@@ -18,14 +18,14 @@ function getUser(req, res) {
   UserSchema.findById(req.body._id)
     .then((user) => {
       if (!user) {
-        res.status(validationErrorCode).send({ message: 'Пользователь с указанным _id не найден' });
+        res.status(сastErrorCode).send({ message: 'Пользователь с указанным _id не найден' });
         return;
       }
       res.send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(сastErrorCode).send({ message: 'Переданы некорректные данные _id пользователя' });
+        res.status(validationErrorCode).send({ message: 'Переданы некорректные данные _id пользователя' });
       } else {
         res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка' });
       }
