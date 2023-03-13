@@ -1,8 +1,5 @@
 const UserSchema = require('../models/user');
-
-const validationErrorCode = 404;
-const сastErrorCode = 400;
-const generalErrorCode = 500;
+const { validationErrorCode, сastErrorCode, generalErrorCode } = require('../utils/errorCodes');
 
 function getUsers(req, res) {
   return UserSchema.find({})
@@ -34,16 +31,8 @@ function getUser(req, res) {
 
 function createUser(req, res) {
   const { name, about, avatar } = req.body;
-
   UserSchema.create({ name, about, avatar })
-    .then((user) => {
-      if (name === undefined || about === undefined || avatar === undefined) {
-
-        res.status(сastErrorCode).send({ message: 'Переданы некорректные данные при создании пользователя' });
-        return;
-      }
-      res.send(user);
-    })
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(сastErrorCode).send({ message: 'Переданы некорректные данные при обновлении профиля' });
@@ -60,7 +49,7 @@ function patchUserInfo(req, res) {
       name: req.body.name,
       about: req.body.about,
     },
-    { new: true },
+    { new: true, runValidators: true },
   )
     .then((user) => {
       if (!user) {
@@ -81,7 +70,7 @@ function pathAvatar(req, res) {
   UserSchema.findByIdAndUpdate(
     req.user._id,
     { avatar: req.body.avatar },
-    { new: true },
+    { new: true, runValidators: true },
   )
     .then((user) => {
       if (!user) {
@@ -90,7 +79,7 @@ function pathAvatar(req, res) {
     })
     .then(() => res.send(req.body))
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         res.status(сastErrorCode).send({ message: 'Переданы некорректные данные при обновлении аватара' });
       } else {
         res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка' });
