@@ -32,7 +32,7 @@ function createCard(req, res) {
       } else {
         res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка' });
       }
-    });
+    })
 }
 
 function deleteCard(req, res) {

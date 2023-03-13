@@ -15,17 +15,17 @@ function getUsers(req, res) {
 }
 
 function getUser(req, res) {
-  UserSchema.findById(req.body._id)
+  UserSchema.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        res.status(сastErrorCode).send({ message: 'Пользователь с указанным _id не найден' });
+        res.status(validationErrorCode).send({ message: 'Пользователь с указанным _id не найден' });
         return;
       }
       res.send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        res.status(validationErrorCode).send({ message: 'Переданы некорректные данные _id пользователя' });
+        res.status(сastErrorCode).send({ message: 'Переданы некорректные данные _id пользователя' });
       } else {
         res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка' });
       }
@@ -38,6 +38,7 @@ function createUser(req, res) {
   UserSchema.create({ name, about, avatar })
     .then((user) => {
       if (name === undefined || about === undefined || avatar === undefined) {
+
         res.status(сastErrorCode).send({ message: 'Переданы некорректные данные при создании пользователя' });
         return;
       }
