@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParse = require('body-parser');
 
+const errorHandler = require('./middlewares/error')
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 
@@ -20,6 +21,7 @@ app.use(bodyParse.urlencoded({ extended: true }));
 app.use(usersRouter);
 app.use(cardsRouter);
 
+app.use(errorHandler)
 app.use((req, res) => {
   res.status(404).send({ message: 'Страницы по данному адресу не существует' });
 });

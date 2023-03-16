@@ -14,7 +14,7 @@ function login(req, res, next) {
   const { email, password } = req.body;
   // ищем пользователя
   UserSchema.findOne({ email }).select('+password')
-    .orFail(() => next(new Unauthorized('Требуется авторизация')))
+    .orFail(() =>  next(new Unauthorized('Требуется авторизация')))
   // нашли. теперь сравним пароли
     .then((user) => bcrypt.compare(password, user.password)
       .then((matched) => {
