@@ -1,7 +1,9 @@
 const CardSchema = require('../models/card');
-const {ValidationError,
+const {
+  ValidationError,
   CastError,
-  InternalServerError} = require('../Errors/Errors');
+  InternalServerError,
+} = require('../Errors/Errors');
 
 // ПОЛУЧЕНИЕ КАРТОЧЕК
 function getCards(req, res, next) {
@@ -11,7 +13,7 @@ function getCards(req, res, next) {
 }
 
 // СОЗДАНИЕ КАРТОЧКИ
-function createCard(req, res) {
+function createCard(req, res, next) {
   CardSchema.create({
     name: req.body.name,
     link: req.body.link,

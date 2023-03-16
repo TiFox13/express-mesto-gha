@@ -1,39 +1,38 @@
-const UserSchema = require('../models/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const {ValidationError,
+const UserSchema = require('../models/user');
+const {
+  ValidationError,
   CastError,
   Unauthorized,
   Conflict,
-  InternalServerError} = require('../Errors/Errors');
-
+  InternalServerError,
+} = require('../Errors/Errors');
 
 // ВХОД \/
 function login(req, res, next) {
-
   const { email, password } = req.body;
   // ищем пользователя
   UserSchema.findOne({ email }).select('+password')
-  .orFail(() => next(new Unauthorized('Требуется авторизация')))
+    .orFail(() => next(new Unauthorized('Требуется авторизация')))
   // нашли. теперь сравним пароли
-  .then((user) =>
-    bcrypt.compare(password, user.password)
-    .then((matched) => {
-      if (matched) {
-        return user;
-      }
+    .then((user) => bcrypt.compare(password, user.password)
+      .then((matched) => {
+        if (matched) {
+          return user;
+        }
         return next(new CastError('Пользователь не найден'));
-    }))
+      }))
   // все сошлось, теперь выдаем пользователю токен
-  .then((user) => {
-    console.log(user)
-    const token = jwt.sign({ _id : user._id }, 'super-strong-secret', { expiresIn:'7d' });
-    res.send({
-      email: user.email,
-      password: user.password,
-      token: token });
-  })
-  .catch(() => next(new InternalServerError()));
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' });
+      res.send({
+        email: user.email,
+        password: user.password,
+        token,
+      });
+    })
+    .catch(() => next(new InternalServerError()));
 }
 
 // ПОЛУЧЕНИЕ ВСЕХ ПОЛЬЗОВАТЕЛЕЙ
@@ -50,7 +49,7 @@ function getUser(req, res, next) {
   UserSchema.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-       next(new ValidationError('Пользователь с указанным _id не найден'));
+        next(new ValidationError('Пользователь с указанным _id не найден'));
         return;
       }
       res.send(user);
@@ -67,32 +66,35 @@ function getUser(req, res, next) {
 // ПОЛУЧЕНИЕ ПОЛЬЗОВАТЕЛЯ ПО ID\/
 function getUserById(req, res, next) {
   const { _id } = req.user;
-  User.findById(_id).then((user) => {
+  UserSchema.findById(_id).then((user) => {
     // проверяем, есть ли пользователь с таким id
     if (!user) {
       next(new ValidationError('Пользователь  не найден'));
       return;
     }
     // возвращаем пользователя, если он есть
-    return res.status(200).send(user);
+    res.status(200).send(user);
   })
-  .catch(() => next(new InternalServerError()));
-};
+    .catch(() => next(new InternalServerError()));
+}
 
 // СОЗДАНИЕ НОВОГО ПОЛЬЗОВАТЕЛЯ\/
 function createUser(req, res, next) {
-  const {email, password, name, about, avatar } = req.body;
+  const {
+    email, password, name, about, avatar,
+  } = req.body;
   bcrypt.hash(password, 10)
-  .then((hash) =>
-    UserSchema.create({ email, password: hash, name, about, avatar }))
-  .then((user) => res.send(user))
-  .catch((err) => {
-    if (err.code === 11000) {
-      next(new Conflict('Пользователь с такими данными уже существует'));
-    } else {
-      next(new InternalServerError());
-    }
-  })
+    .then((hash) => UserSchema.create({
+      email, password: hash, name, about, avatar,
+    }))
+    .then((user) => res.send(user))
+    .catch((err) => {
+      if (err.code === 11000) {
+        next(new Conflict('Пользователь с такими данными уже существует'));
+      } else {
+        next(new InternalServerError());
+      }
+    });
 }
 
 // ИЗМЕНЕНИЕ ИНФОРМАЦИИ О ПОЛЬЗОВАТЕЛЕ
@@ -108,7 +110,6 @@ function patchUserInfo(req, res, next) {
     .then((user) => {
       if (!user) {
         next(new ValidationError('Пользователь с указанным _id не найден'));
-        return;
       }
     })
     .then(() => res.send(req.body))
@@ -122,7 +123,7 @@ function patchUserInfo(req, res, next) {
 }
 
 // ИЗМЕНЕНИЕ АВАТАРА
-function pathAvatar(req, res) {
+function pathAvatar(req, res, next) {
   UserSchema.findByIdAndUpdate(
     req.user._id,
     { avatar: req.body.avatar },
@@ -131,7 +132,6 @@ function pathAvatar(req, res) {
     .then((user) => {
       if (!user) {
         next(new ValidationError('Пользователь с указанным _id не найден'));
-        return;
       }
     })
     .then(() => res.send(req.body))

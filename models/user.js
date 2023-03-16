@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-const validator = require('validator')
+const validator = require('validator');
+const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -16,50 +17,48 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-    select: false
+    select: false,
   },
   name: {
     type: String,
     minlength: 2,
     maxlength: 30,
-    default: 'Жак-Ив Кусто'
+    default: 'Жак-Ив Кусто',
   },
   about: {
     type: String,
     minlength: 2,
     maxlength: 30,
-    default: 'Исследователь'
+    default: 'Исследователь',
   },
   avatar: {
     type: String,
     validate: {
       validator(v) {
-       return /https?\:\/{2,}w{0,3}[a-zA-Z0-9][-._~:/?#[\]@!\$&'\(\)\*\+,;=]/.test(v);
+        return /https?:\/{2,}w{0,3}[a-zA-Z0-9][-._~:/?#[]@!\$&'()\*\+,;=]/.test(v);
       },
-      message: props => `${props.value} is not a valid phone number!`
+      message: (props) => `${props.value} is not a valid phone number!`,
     },
-    default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png'
+    default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
   },
 });
 
 userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email }) // this — это модель User
-  .then((user) => {
+    .then((user) => {
     // не нашёлся — отклоняем промис
-    if (!user) {
-      return Promise.reject(new Error('Неправильные почта или пароль'));
-    }
+      if (!user) {
+        return Promise.reject(new Error('Неправильные почта или пароль'));
+      }
       // нашёлся — сравниваем хеши
       return bcrypt.compare(password, user.password)
-        .then ((matched) => {
+        .then((matched) => {
           if (!matched) {
             return Promise.reject(new Error('Неправильные почта или пароль'));
           }
           return user;
-        })
-    })
-
+        });
+    });
 };
-
 
 module.exports = mongoose.model('user', userSchema);

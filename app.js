@@ -13,7 +13,7 @@ mongoose.connect('mongodb://0.0.0.0:27017/mestodb', {
 });
 
 const app = express();
-app.use(cors({ origin: 'http://localhost:3001' }))
+app.use(cors({ origin: 'http://localhost:3001' }));
 app.use(bodyParse.json());
 app.use(bodyParse.urlencoded({ extended: true }));
 
