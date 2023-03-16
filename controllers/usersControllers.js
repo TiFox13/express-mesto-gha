@@ -14,7 +14,7 @@ function login(req, res, next) {
   const { email, password } = req.body;
   // ищем пользователя
   UserSchema.findOne({ email }).select('+password')
-    .orFail(() =>  next(new Unauthorized('Требуется авторизация')))
+    .orFail(() => next(new Unauthorized('Требуется авторизация')))
   // нашли. теперь сравним пароли
     .then((user) => bcrypt.compare(password, user.password)
       .then((matched) => {
@@ -63,7 +63,7 @@ function getUser(req, res, next) {
     });
 }
 
-// ПОЛУЧЕНИЕ ПОЛЬЗОВАТЕЛЯ ПО ID\/
+// ПОЛУЧЕНИЕ ИНФЫ О ПОЛЬЗОВАТЕЛЕ
 function getUserById(req, res, next) {
   const { _id } = req.user;
   UserSchema.findById(_id).then((user) => {
@@ -73,7 +73,7 @@ function getUserById(req, res, next) {
       return;
     }
     // возвращаем пользователя, если он есть
-    res.status(200).send(user);
+    res.send(user);
   })
     .catch(() => next(new InternalServerError()));
 }
@@ -83,6 +83,7 @@ function createUser(req, res, next) {
   const {
     email, password, name, about, avatar,
   } = req.body;
+
   bcrypt.hash(password, 10)
     .then((hash) => UserSchema.create({
       email, password: hash, name, about, avatar,
@@ -91,8 +92,12 @@ function createUser(req, res, next) {
     .catch((err) => {
       if (err.code === 11000) {
         next(new Conflict('Пользователь с такими данными уже существует'));
+        return;
+      }
+      if (err.name === 'ValidationError') {
+        next(new CastError('Переданы некорректные данные для создания пользователя'));
       } else {
-        next(new InternalServerError());
+        next(err);
       }
     });
 }

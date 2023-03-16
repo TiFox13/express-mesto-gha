@@ -37,7 +37,7 @@ const userSchema = new mongoose.Schema({
       validator(v) {
         return /https?:\/{2,}w{0,3}[a-zA-Z0-9][-._~:/?#[]@!\$&'()\*\+,;=]/.test(v);
       },
-      message: (props) => `${props.value} is not a valid phone number!`,
+      message: 'Неверный формат ссылки',
     },
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
   },
