@@ -8,21 +8,25 @@ const { validationErrorCode, сastErrorCode, generalErrorCode } = require('../ut
 // ВХОД
 function login(req, res) {
 
-  res.status(200).send({message: "логинимся!"})
-  // const { email, password } = req.body;
-  // return UserSchema.findUserByCredentials(email, password)
-  // .then((user) =>{
-  //   const token = jwt.sign({ _id: user._id }, 'super-strong-secret', {expiresIn:'7d'});
-
-  //   // вернём токен
-  //   res.send({ token });
-  // })
-  // .catch((err) => {
-  //   // возвращаем ошибку аутентификации
-  //   res
-  //     .status(401)
-  //     .send({ message: err.message });
-  // });
+  const { email, password } = req.body;
+  // ищем пользователя
+  UserSchema.findOne({email:email})
+  .orFail(() => res.status(404).send({ message: 'Пользователь не найден' }))
+  // нашли. теперь сравним пароли
+  .then((user) => bcrypt.compare(password, user.password).then((matched) => {
+    if (matched) {
+      return user;
+    }
+      return res.status(404).send({ message: 'Пользователь не найден' });
+  }))
+  // все сошлось, теперь выдаем пользователю токен
+  .then((user) => {
+    const token = jwt.sign({ _id : user._id }, 'super-strong-secret', { expiresIn:'7d' });
+    res.send({ token });
+  })
+  .catch(() => {
+    res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка' });
+  });
 }
 
 // ПОЛУЧЕНИЕ ВСЕХ ПОЛЬЗОВАТЕЛЕЙ
@@ -55,7 +59,7 @@ function getUser(req, res) {
     });
 }
 
-// СОЗДАНИЕ НОВОГО ПОЛЬЗОВАТЕЛЯ
+// СОЗДАНИЕ НОВОГО ПОЛЬЗОВАТЕЛЯ\/
 function createUser(req, res, next) {
   const {email, password, name, about, avatar } = req.body;
   bcrypt.hash(password, 10)
