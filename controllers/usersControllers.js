@@ -1,5 +1,22 @@
 const UserSchema = require('../models/user');
+const bcrypt = require('bcryptjs');
+
 const { validationErrorCode, сastErrorCode, generalErrorCode } = require('../utils/errorCodes');
+
+function login(req, res) {
+  const { email, password } = req.body;
+  return UserSchema.findUserByCredentials(email, password)
+  .then((user) =>{
+    // аутентификация успешна! пользователь в переменной user
+  })
+  .catch((err) => {
+    // возвращаем ошибку аутентификации
+    res
+      .status(401)
+      .send({ message: err.message });
+  });
+}
+
 
 function getUsers(req, res) {
   return UserSchema.find({})
@@ -30,8 +47,10 @@ function getUser(req, res) {
 }
 
 function createUser(req, res) {
-  const { name, about, avatar } = req.body;
-  UserSchema.create({ name, about, avatar })
+  bcrypt.hash(req.body.password, 10)
+  .then(hash => UserSchema.create({
+    email: req.body.email,
+    password: hash })
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -39,7 +58,8 @@ function createUser(req, res) {
       } else {
         res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка' });
       }
-    });
+    })
+    )
 }
 
 function patchUserInfo(req, res) {

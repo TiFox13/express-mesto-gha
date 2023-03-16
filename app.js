@@ -13,8 +13,6 @@ mongoose.connect('mongodb://0.0.0.0:27017/mestodb', {
 
 const app = express();
 
-// app.use(express.static(path.join((__dirname, ''))));
-// можно удалить. статические файлы не юзаютс в проекте
 app.use(bodyParse.json());
 app.use(bodyParse.urlencoded({ extended: true }));
 
