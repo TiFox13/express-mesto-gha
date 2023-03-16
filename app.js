@@ -6,7 +6,6 @@ const bodyParse = require('body-parser');
 
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
-const errorHandler = require('./middlewares/error');
 
 mongoose.connect('mongodb://0.0.0.0:27017/mestodb', {
   useNewUrlParser: true,
@@ -17,13 +16,6 @@ const app = express();
 app.use(cors({ origin: 'http://localhost:3001' }))
 app.use(bodyParse.json());
 app.use(bodyParse.urlencoded({ extended: true }));
-
-// app.use((req, res, next) => {
-//   req.user = {
-//     _id: '64070a5146ec33d6e543d735', // _id созданного тест пользователя (хардкод)
-//   };
-//   next();
-// });
 
 app.use(usersRouter);
 app.use(cardsRouter);

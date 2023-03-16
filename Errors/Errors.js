@@ -14,15 +14,15 @@ class CastError extends Error {
   }
 }
 
-
+// эта штука перенесена в мидлвер
 class InternalServerError extends Error {
-  constructor(message) {
-    super(message);
+  constructor() {
+    super();
+    this.message = "На сервере произошла ошибка";
     this.name = "InternalServerError";
     this.statusCode = 500;
   }
 }
-
 
 class Unauthorized extends Error {
   constructor(message) {
@@ -43,7 +43,7 @@ class Conflict extends Error {
 module.exports = {
   ValidationError,
   CastError,
-  InternalServerError,
   Unauthorized,
   Conflict,
+  InternalServerError
 }
