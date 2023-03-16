@@ -1,23 +1,31 @@
 const UserSchema = require('../models/user');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
 
 const { validationErrorCode, сastErrorCode, generalErrorCode } = require('../utils/errorCodes');
 
+// ВХОД
 function login(req, res) {
-  const { email, password } = req.body;
-  return UserSchema.findUserByCredentials(email, password)
-  .then((user) =>{
-    // аутентификация успешна! пользователь в переменной user
-  })
-  .catch((err) => {
-    // возвращаем ошибку аутентификации
-    res
-      .status(401)
-      .send({ message: err.message });
-  });
+
+  res.status(200).send({message: "логинимся!"})
+  // const { email, password } = req.body;
+  // return UserSchema.findUserByCredentials(email, password)
+  // .then((user) =>{
+  //   const token = jwt.sign({ _id: user._id }, 'super-strong-secret', {expiresIn:'7d'});
+
+  //   // вернём токен
+  //   res.send({ token });
+  // })
+  // .catch((err) => {
+  //   // возвращаем ошибку аутентификации
+  //   res
+  //     .status(401)
+  //     .send({ message: err.message });
+  // });
 }
 
-
+// ПОЛУЧЕНИЕ ВСЕХ ПОЛЬЗОВАТЕЛЕЙ
 function getUsers(req, res) {
   return UserSchema.find({})
     .then((users) => {
@@ -28,6 +36,7 @@ function getUsers(req, res) {
     });
 }
 
+// ПОЛУЧЕНИЕ ПОЛЬЗОВАТЕЛЯ ПО ID
 function getUser(req, res) {
   UserSchema.findById(req.params.userId)
     .then((user) => {
@@ -46,22 +55,23 @@ function getUser(req, res) {
     });
 }
 
-function createUser(req, res) {
-  bcrypt.hash(req.body.password, 10)
-  .then(hash => UserSchema.create({
-    email: req.body.email,
-    password: hash })
-    .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(сastErrorCode).send({ message: 'Переданы некорректные данные при обновлении профиля' });
-      } else {
-        res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка' });
-      }
-    })
-    )
+// СОЗДАНИЕ НОВОГО ПОЛЬЗОВАТЕЛЯ
+function createUser(req, res, next) {
+  const {email, password, name, about, avatar } = req.body;
+  bcrypt.hash(password, 10)
+  .then((hash) =>
+    UserSchema.create({ email, password: hash, name, about, avatar }))
+  .then((user) => res.send({message: 'Регистрация прошла успешно!'}))
+  .catch((err) => {
+    if (err.code === 11000) {
+     res.status(409).send({ message: 'Пользователь с такими данными уже существует'})
+    } else {
+      next(err);
+    }
+  })
 }
 
+// ИЗМЕНЕНИЕ ИНФОРМАЦИИ О ПОЛЬЗОВАТЕЛЕ
 function patchUserInfo(req, res) {
   UserSchema.findByIdAndUpdate(
     req.user._id,
@@ -86,6 +96,7 @@ function patchUserInfo(req, res) {
     });
 }
 
+//ИЗМЕНЕНИЕ АВАТАРА
 function pathAvatar(req, res) {
   UserSchema.findByIdAndUpdate(
     req.user._id,
@@ -113,4 +124,5 @@ module.exports = {
   createUser,
   patchUserInfo,
   pathAvatar,
+  login,
 };
