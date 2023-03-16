@@ -2,15 +2,14 @@ const UserSchema = require('../models/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-
 const { validationErrorCode, сastErrorCode, generalErrorCode } = require('../utils/errorCodes');
 
-// ВХОД
-function login(req, res) {
+// ВХОД \/
+function login(req, res, next) {
 
   const { email, password } = req.body;
   // ищем пользователя
-  UserSchema.findOne({email:email})
+  UserSchema.findOne({ email }).select('+password')
   .orFail(() => res.status(404).send({ message: 'Пользователь не найден' }))
   // нашли. теперь сравним пароли
   .then((user) => bcrypt.compare(password, user.password).then((matched) => {
@@ -21,12 +20,14 @@ function login(req, res) {
   }))
   // все сошлось, теперь выдаем пользователю токен
   .then((user) => {
+    console.log(user)
     const token = jwt.sign({ _id : user._id }, 'super-strong-secret', { expiresIn:'7d' });
-    res.send({ token });
+    res.send({
+      email: user.email,
+      password: user.password,
+      token: token });
   })
-  .catch(() => {
-    res.status(generalErrorCode).send({ message: 'На сервере произошла ошибка' });
-  });
+  .catch(next);
 }
 
 // ПОЛУЧЕНИЕ ВСЕХ ПОЛЬЗОВАТЕЛЕЙ
@@ -59,6 +60,19 @@ function getUser(req, res) {
     });
 }
 
+function getCurrentUser(req, res, next) {
+  const { _id } = req.user;
+  User.findById(_id).then((user) => {
+    // проверяем, есть ли пользователь с таким id
+    if (!user) {
+      res.status(validationErrorCode).send({ message: 'Пользователь не найден' });
+    }
+    // возвращаем пользователя, если он есть
+    return res.status(200).send(user);
+  })
+  .catch(next);
+};
+
 // СОЗДАНИЕ НОВОГО ПОЛЬЗОВАТЕЛЯ\/
 function createUser(req, res, next) {
   const {email, password, name, about, avatar } = req.body;
@@ -74,6 +88,8 @@ function createUser(req, res, next) {
     }
   })
 }
+
+
 
 // ИЗМЕНЕНИЕ ИНФОРМАЦИИ О ПОЛЬЗОВАТЕЛЕ
 function patchUserInfo(req, res) {
@@ -129,4 +145,5 @@ module.exports = {
   patchUserInfo,
   pathAvatar,
   login,
+  getCurrentUser,
 };

@@ -1,32 +1,22 @@
-// const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 
-// const handleAuthError = (res) => {
-//   res.status(401).send({ "message": "Ошибка авторизации" } )
-// };
+const auth = (req, res, next) => {
 
-// const extractBearerToken = (header) => {
-//   // напишите код здесь
-//     const token = header.replace('Bearer ', '');
-//   return token
-// };
+  const { authorization } = req.headers;
 
-// module.exports = (req, res, next) => {
-//   const { authorization } = req.headers;
+  if (!authorization || !authorization.startsWith('Bearer ')) {
+    return  res.status(401).send({ "message": "Ошибка авторизации" });
+  }
 
-//   if (!authorization || !authorization.startsWith('Bearer ')) {
-//     return handleAuthError(res);
-//   }
+  const token = authorization.replace('Bearer ', '')
 
-//   const token = extractBearerToken(authorization);
-//   let payload;
+  try {
+    payload = jwt.verify(token, 'super-strong-secret');
+  } catch (err) {
+    res.status(401).send({ "message": "Ошибка авторизации" });
+  }
+req.user = payload;
+  next(); // пропускаем запрос дальше
+};
 
-//   try {
-//     payload = jwt.verify(token, 'super-strong-secret');
-//   } catch (err) {
-//     return handleAuthError(res);
-//   }
-
-//   req.user = payload; // записываем пейлоуд в объект запроса
-
-//   next(); // пропускаем запрос дальше
-// };
+module.exports = auth;

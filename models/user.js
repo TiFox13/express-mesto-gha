@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
+    select: false
   },
   name: {
     type: String,
@@ -31,6 +32,12 @@ const userSchema = new mongoose.Schema({
   },
   avatar: {
     type: String,
+    validate: {
+      validator(v) {
+       return /https?\:\/{2,}w{0,3}[a-zA-Z0-9]/.test(v);
+      },
+      message: props => `${props.value} is not a valid phone number!`
+    },
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png'
   },
 });
