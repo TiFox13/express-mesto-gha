@@ -45,7 +45,7 @@ function getUsers(req, res, next) {
 }
 
 // ПОЛУЧЕНИЕ ПОЛЬЗОВАТЕЛЯ ПО ID
-function getUser(req, res, next) {
+function getUserById(req, res, next) {
   UserSchema.findById(req.params.userId)
     .then((user) => {
       if (!user) {
@@ -64,7 +64,7 @@ function getUser(req, res, next) {
 }
 
 // ПОЛУЧЕНИЕ ИНФЫ О ПОЛЬЗОВАТЕЛЕ
-function getUserById(req, res, next) {
+function getUser(req, res, next) {
   const { _id } = req.user;
   UserSchema.findById(_id).then((user) => {
     // проверяем, есть ли пользователь с таким id

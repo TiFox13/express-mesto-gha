@@ -35,7 +35,9 @@ function deleteCard(req, res, next) {
     .then((card) => {
       if (!card) {
         next(new ValidationError('Карточка с указанным _id не найдена'));
-        return;
+      }
+      if (!card.owner === req.user._id) {
+        next(new CastError('ЭЙ! НЕ ТЫ ДЕЛАЛ! (тут надо поменять на ошибку другую)'));
       }
       res.send({ data: card });
     })
