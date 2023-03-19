@@ -12,8 +12,7 @@ router.post('/signin', celebrate({
   }),
 }), login);
 
-router.post(
-  '/signup',
+router.post('/signup',
   celebrate({
     [Segments.BODY]: Joi.object().keys({
       email: Joi.string().email().required(),
@@ -28,36 +27,36 @@ router.post(
 
 router.get('/users', auth, getUsers);
 
-router.get('/users/me', getUser);
+router.get('/users/me', auth, getUser);
 
-router.get(
-  '/users/:userId',
+router.get('/users/:userId',
   celebrate({
     [Segments.PARAMS]: Joi.object().keys({
       userId: Joi.string().length(24),
     }),
   }),
+  auth,
   getUserById,
 );
 
-router.patch(
-  '/users/me',
+router.patch('/users/me',
   celebrate({
     [Segments.BODY]: Joi.object().keys({
       name: Joi.string().min(2).max(30),
       about: Joi.string().min(2).max(30),
     }),
   }),
+  auth,
   patchUserInfo,
 );
 
-router.patch(
-  '/users/me/avatar',
+router.patch('/users/me/avatar',
   celebrate({
     [Segments.BODY]: Joi.object().keys({
       avatar: Joi.string(),
     }),
   }),
+  auth,
   pathAvatar,
 );
 

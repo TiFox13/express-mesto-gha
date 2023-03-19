@@ -46,7 +46,7 @@ function getUsers(req, res, next) {
 
 // ПОЛУЧЕНИЕ ПОЛЬЗОВАТЕЛЯ ПО ID
 function getUserById(req, res, next) {
-  const { _id } = req.user;
+
   UserSchema.findById(req.params.userId)
     .then((user) => {
       if (!user) {
@@ -66,6 +66,7 @@ function getUserById(req, res, next) {
 
 // ПОЛУЧЕНИЕ ИНФЫ О ПОЛЬЗОВАТЕЛЕ
 function getUser(req, res, next) {
+  const { _id } = req.user._id;
   UserSchema.findById(_id).then((user) => {
     // проверяем, есть ли пользователь с таким id
     if (!user) {
@@ -105,8 +106,8 @@ function createUser(req, res, next) {
 // ИЗМЕНЕНИЕ ИНФОРМАЦИИ О ПОЛЬЗОВАТЕЛЕ
 function patchUserInfo(req, res, next) {
   UserSchema.findByIdAndUpdate(
-    req.user._id,
-    {
+    // req.user._id,
+    { id: req.user._id,
       name: req.body.name,
       about: req.body.about,
     },
@@ -131,7 +132,7 @@ function patchUserInfo(req, res, next) {
 function pathAvatar(req, res, next) {
   UserSchema.findByIdAndUpdate(
     req.user._id,
-    { avatar: req.body.avatar },
+    { avatar: req.body },
     { new: true, runValidators: true },
   )
     .then((user) => {
