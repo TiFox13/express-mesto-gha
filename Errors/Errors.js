@@ -40,10 +40,18 @@ class Conflict extends Error {
   }
 }
 
+class Forbidden extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'Forbidden';
+    this.statusCode = 403;
+  }
+}
 module.exports = {
   ValidationError,
   CastError,
   Unauthorized,
   Conflict,
   InternalServerError,
+  Forbidden,
 };
