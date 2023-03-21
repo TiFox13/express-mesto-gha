@@ -77,7 +77,14 @@ function createUser(req, res, next) {
     .then((hash) => UserSchema.create({
       email, password: hash, name, about, avatar,
     }))
-    .then((user) => res.send(user))
+    .then((user) => res.send({
+      _id: user._id,
+      email: user.email,
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+
+    }))
     .catch((err) => {
       if (err.code === 11000) {
         next(new Conflict('Пользователь с такими данными уже существует'));
