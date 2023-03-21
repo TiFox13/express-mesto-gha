@@ -10,9 +10,8 @@ const {
   login,
   getUserById,
 } = require('../controllers/usersControllers');
-const { ValidationError } = require('../Errors/Errors');
-const idValidator = require('../validator/validator')
-
+const { ValidationError } = require('../Errors/ValidationError');
+const { idValidator } = require('../utils/validator');
 
 router.post('/signin', celebrate({
   [Segments.BODY]: Joi.object().keys({
@@ -21,7 +20,8 @@ router.post('/signin', celebrate({
   }),
 }), login);
 
-router.post('/signup',
+router.post(
+  '/signup',
   celebrate({
     [Segments.BODY]: Joi.object().keys({
       email: Joi.string().email().required(),
@@ -29,8 +29,8 @@ router.post('/signup',
       name: Joi.string().min(2).max(30).default('Жак-Ив Кусто'),
       about: Joi.string().min(2).max(30).default('Исследователь'),
       avatar: Joi.string()
-      .default('https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png')
-      .pattern(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/),
+        .default('https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png')
+        .pattern(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/),
     }),
   }),
   createUser,
@@ -40,7 +40,8 @@ router.get('/users', auth, getUsers);
 
 router.get('/users/me', auth, getUser);
 
-router.get('/users/:userId',
+router.get(
+  '/users/:userId',
   celebrate({
     [Segments.PARAMS]: Joi.object().keys({
       userId: idValidator,
@@ -50,7 +51,8 @@ router.get('/users/:userId',
   getUserById,
 );
 
-router.patch('/users/me',
+router.patch(
+  '/users/me',
   celebrate({
     [Segments.BODY]: Joi.object().keys({
       name: Joi.string().min(2).max(30),
@@ -61,11 +63,12 @@ router.patch('/users/me',
   patchUserInfo,
 );
 
-router.patch('/users/me/avatar',
+router.patch(
+  '/users/me/avatar',
   celebrate({
     [Segments.BODY]: Joi.object().keys({
       avatar: Joi.string()
-      .pattern(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/),
+        .pattern(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/),
     }),
   }),
   auth,
@@ -75,7 +78,5 @@ router.patch('/users/me/avatar',
 router.use('*', auth, (req, res, next) => {
   next(new ValidationError('Страницы по данному адресу не существует'));
 });
-
-
 
 module.exports = router;

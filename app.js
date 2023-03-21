@@ -4,8 +4,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParse = require('body-parser');
 
-const errorHandler = require('./middlewares/error');
 const { errors } = require('celebrate');
+const errorHandler = require('./middlewares/error');
 
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');

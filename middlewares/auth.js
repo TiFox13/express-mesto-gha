@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { Unauthorized } = require('../Errors/Errors');
+const { Unauthorized } = require('../Errors/Unauthorized');
 
 const auth = (req, res, next) => {
   const { authorization } = req.headers;

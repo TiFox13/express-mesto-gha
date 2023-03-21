@@ -1,19 +1,17 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const UserSchema = require('../models/user');
-const {
-  ValidationError,
-  CastError,
-  Conflict,
-  InternalServerError,
-} = require('../Errors/Errors');
+const { ValidationError } = require('../Errors/ValidationError');
+const { CastError } = require('../Errors/CastError');
+const { InternalServerError } = require('../Errors/InternalServerError');
+const { Conflict } = require('../Errors/Conflict');
 
-// ВХОД \/
+// ВХОД
 function login(req, res, next) {
   const { email, password } = req.body;
   // ищем пользователя
-  UserSchema.findUserByCredentials( email, password )
-  // все сошлось, теперь выдаем пользователю токен
+  UserSchema.findUserByCredentials(email, password)
+    // все сошлось, теперь выдаем пользователю токен
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' });
       res.send({
@@ -57,19 +55,19 @@ function getUserById(req, res, next) {
 function getUser(req, res, next) {
   const { _id } = req.user._id;
   UserSchema.findById(_id)
-  .then((user) => {
-    // проверяем, есть ли пользователь с таким id
-    if (!user) {
-      next(new ValidationError('Пользователь  не найден'));
-      return;
-    }
-    // возвращаем пользователя, если он есть
-    res.send(user);
-  })
+    .then((user) => {
+      // проверяем, есть ли пользователь с таким id
+      if (!user) {
+        next(new ValidationError('Пользователь  не найден'));
+        return;
+      }
+      // возвращаем пользователя, если он есть
+      res.send(user);
+    })
     .catch(() => next(new InternalServerError()));
 }
 
-// СОЗДАНИЕ НОВОГО ПОЛЬЗОВАТЕЛЯ\/
+// СОЗДАНИЕ НОВОГО ПОЛЬЗОВАТЕЛЯ
 function createUser(req, res, next) {
   const {
     email, password, name, about, avatar,
@@ -97,7 +95,8 @@ function createUser(req, res, next) {
 function patchUserInfo(req, res, next) {
   UserSchema.findByIdAndUpdate(
     // req.user._id,
-    { id: req.user._id,
+    {
+      id: req.user._id,
       name: req.body.name,
       about: req.body.about,
     },
@@ -106,7 +105,6 @@ function patchUserInfo(req, res, next) {
     .then((user) => {
       if (!user) {
         next(new ValidationError('Пользователь с указанным _id не найден'));
-        return;
       }
     })
     .then(() => res.send(req.body))
@@ -129,7 +127,6 @@ function pathAvatar(req, res, next) {
     .then((user) => {
       if (!user) {
         next(new ValidationError('Пользователь с указанным _id не найден'));
-        return;
       }
     })
     .then(() => res.send(req.body))
@@ -141,8 +138,6 @@ function pathAvatar(req, res, next) {
       }
     });
 }
-
-
 
 module.exports = {
   getUser,

@@ -1,10 +1,8 @@
 const CardSchema = require('../models/card');
-const {
-  ValidationError,
-  CastError,
-  InternalServerError,
-  Forbidden,
-} = require('../Errors/Errors');
+const { ValidationError } = require('../Errors/ValidationError');
+const { CastError } = require('../Errors/CastError');
+const { InternalServerError } = require('../Errors/InternalServerError');
+const { Forbidden } = require('../Errors/Forbidden');
 
 // ПОЛУЧЕНИЕ КАРТОЧЕК
 function getCards(req, res, next) {
@@ -22,7 +20,7 @@ function createCard(req, res, next) {
   })
     .then((card) => res.send(card))
     .catch((err) => {
-      if (err.name === 'ValidationError' ) {
+      if (err.name === 'ValidationError') {
         next(new CastError('Переданы некорректные данные при создании карточки'));
       } else {
         next(new InternalServerError());
@@ -33,23 +31,25 @@ function createCard(req, res, next) {
 // УДАЛЕНИЕ КАРТОЧКИ
 function deleteCard(req, res, next) {
   CardSchema.findById(req.params.cardId)
-  .then((card) => {
-    if (!card) {
-      return next(new ValidationError('Карточка с указанным _id не найдена'));
-    }
-    if (!card.owner === req.user._id) {
-      return next(new Forbidden('Нельзя удалять чужие карточки'));
-    }
-   card.remove()
-   .then(() => res.send({ message: 'Карточка успешно удалена' }));
-  })
-  .catch((err) => {
-    if (err.name === 'CastError') {
-      next(new CastError('Переданы некорректные данные _id пользователя'));
-    } else {
-      next(new InternalServerError());
-    }
-  })
+    .then((card) => {
+      if (!card) {
+        next(new ValidationError('Карточка с указанным _id не найдена'));
+        return;
+      }
+      if (!card.owner === req.user._id) {
+        next(new Forbidden('Нельзя удалять чужие карточки'));
+        return;
+      }
+      card.remove()
+        .then(() => res.send({ message: 'Карточка успешно удалена' }));
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new CastError('Переданы некорректные данные _id пользователя'));
+      } else {
+        next(new InternalServerError());
+      }
+    });
 }
 
 // ПОСТАВИТЬ ЛАЙК
@@ -61,7 +61,8 @@ function putLike(req, res, next) {
   )
     .then((card) => {
       if (!card) {
-        return next(new ValidationError('Переданы некорректные данные для постановки лайка'));
+        next(new ValidationError('Переданы некорректные данные для постановки лайка'));
+        return;
       }
       res.send(card);
     })
@@ -83,7 +84,8 @@ function deleteLike(req, res, next) {
   )
     .then((card) => {
       if (!card) {
-        return next(new ValidationError('Переданы некорректные данные для снятия лайка'));
+        next(new ValidationError('Переданы некорректные данные для снятия лайка'));
+        return;
       }
       res.send(card);
     })
