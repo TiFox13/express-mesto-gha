@@ -9,6 +9,7 @@ const errorHandler = require('./middlewares/error');
 
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
+const { ValidationError } = require('./Errors/ValidationError');
 
 mongoose.connect('mongodb://0.0.0.0:27017/mestodb', {
   useNewUrlParser: true,
@@ -22,6 +23,10 @@ app.use(bodyParse.urlencoded({ extended: true }));
 
 app.use(usersRouter);
 app.use(cardsRouter);
+
+app.use('*', (req, res, next) => {
+  next(new ValidationError('Страницы по данному адресу не существует222'));
+});
 
 app.use(errors());
 app.use(errorHandler);

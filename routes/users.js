@@ -10,7 +10,6 @@ const {
   login,
   getUserById,
 } = require('../controllers/usersControllers');
-const { ValidationError } = require('../Errors/ValidationError');
 const { idValidator } = require('../utils/validator');
 
 router.post('/signin', celebrate({
@@ -74,9 +73,5 @@ router.patch(
   auth,
   pathAvatar,
 );
-
-router.use('*', auth, (req, res, next) => {
-  next(new ValidationError('Страницы по данному адресу не существует'));
-});
 
 module.exports = router;

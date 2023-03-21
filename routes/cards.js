@@ -8,7 +8,6 @@ const {
   putLike,
   deleteLike,
 } = require('../controllers/cardsControllers');
-const { ValidationError } = require('../Errors/ValidationError');
 const { idValidator } = require('../utils/validator');
 
 router.get('/cards', auth, getCards);
@@ -58,9 +57,5 @@ router.delete(
   auth,
   deleteLike,
 );
-
-router.use('*', auth, (req, res, next) => {
-  next(new ValidationError('Страницы по данному адресу не существует'));
-});
 
 module.exports = router;
