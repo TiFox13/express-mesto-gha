@@ -32,23 +32,24 @@ function createCard(req, res, next) {
 
 // УДАЛЕНИЕ КАРТОЧКИ
 function deleteCard(req, res, next) {
-  CardSchema.findByIdAndRemove(req.params.cardId)
-    .then((card) => {
-      if (!card) {
-        next(new ValidationError('Карточка с указанным _id не найдена'));
-      }
-      if (!card.owner === req.user._id) {
-        next(new Forbidden('Нельзя удалять чужие карточки'));
-      }
-      res.send({ data: card });
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        next(new CastError('Переданы некорректные данные _id пользователя'));
-      } else {
-        next(new InternalServerError());
-      }
-    });
+  CardSchema.findById(req.params.cardId)
+  .then((card) => {
+    if (!card) {
+      return next(new ValidationError('Карточка с указанным _id не найдена'));
+    }
+    if (!card.owner === req.user._id) {
+      return next(new Forbidden('Нельзя удалять чужие карточки'));
+    }
+   card.remove()
+   .then(() => res.send({ message: 'Карточка успешно удалена' }));
+  })
+  .catch((err) => {
+    if (err.name === 'CastError') {
+      next(new CastError('Переданы некорректные данные _id пользователя'));
+    } else {
+      next(new InternalServerError());
+    }
+  })
 }
 
 // ПОСТАВИТЬ ЛАЙК
@@ -60,8 +61,7 @@ function putLike(req, res, next) {
   )
     .then((card) => {
       if (!card) {
-        next(new ValidationError('Переданы некорректные данные для постановки лайка'));
-        return;
+        return next(new ValidationError('Переданы некорректные данные для постановки лайка'));
       }
       res.send(card);
     })
@@ -83,8 +83,7 @@ function deleteLike(req, res, next) {
   )
     .then((card) => {
       if (!card) {
-        next(new ValidationError('Переданы некорректные данные для снятия лайка'));
-        return;
+        return next(new ValidationError('Переданы некорректные данные для снятия лайка'));
       }
       res.send(card);
     })

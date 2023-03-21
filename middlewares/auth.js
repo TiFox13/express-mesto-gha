@@ -6,6 +6,7 @@ const auth = (req, res, next) => {
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
     next(new Unauthorized('Требуется авторизация'));
+    return;
   }
 
   const token = authorization.replace('Bearer ', '');
@@ -14,6 +15,7 @@ const auth = (req, res, next) => {
     payload = jwt.verify(token, 'super-strong-secret');
   } catch (err) {
     next(new Unauthorized('Требуется авторизация'));
+    return;
   }
   req.user = payload;
   next(); // пропускаем запрос дальше

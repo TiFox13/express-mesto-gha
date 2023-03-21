@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
+const { Unauthorized } = require('../Errors/Errors');
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -35,7 +36,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     validate: {
       validator(v) {
-        return /(https?:\/\/)(w{3}\.)?(((\d{1,3}\.){3}\d{1,3})|((\w-?)+\.(ru|com)))(:\d{2,5})?((\/.+)+)?\/?#?/.test(v);
+        return /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/.test(v);
       },
       message: 'Некорректный формат ссылки',
     },
@@ -44,24 +45,22 @@ const userSchema = new mongoose.Schema({
 });
 
 
-userSchema.statics.findUserByCredentials = function (email, password) {
-  return this.findOne({ email }) // this — это модель User
+userSchema.statics.findUserByCredentials = function (email, password, next) {
+  return this.findOne({ email }).select('+password') // this — это модель User
     .then((user) => {
     // не нашёлся — отклоняем промис
       if (!user) {
-        return Promise.reject(new Error('Неправильные почта или пароль'));
+        return next(new Unauthorized('Неправильные почта или пароль'));
       }
       // нашёлся — сравниваем хеши
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new Error('Неправильные почта или пароль'));
+          return next(new Unauthorized('Неправильные почта или пароль'));
           }
           return user;
         });
     });
 };
-
-
 
 module.exports = mongoose.model('user', userSchema);

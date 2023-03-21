@@ -25,9 +25,6 @@ app.use(cardsRouter);
 
 app.use(errors());
 app.use(errorHandler);
-app.use((req, res) => {
-  res.status(404).send({ message: 'Страницы по данному адресу не существует' });
-});
 
 app.listen(PORT, () => {
   // console.log(`App listening on port ${PORT}`);

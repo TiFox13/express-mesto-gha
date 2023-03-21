@@ -4,7 +4,6 @@ const UserSchema = require('../models/user');
 const {
   ValidationError,
   CastError,
-  Unauthorized,
   Conflict,
   InternalServerError,
 } = require('../Errors/Errors');
@@ -13,16 +12,7 @@ const {
 function login(req, res, next) {
   const { email, password } = req.body;
   // ищем пользователя
-  UserSchema.findOne({ email }).select('+password')
-    .orFail(() => next(new Unauthorized('Требуется авторизация')))
-  // нашли. теперь сравним пароли
-    .then((user) => bcrypt.compare(password, user.password)
-      .then((matched) => {
-        if (matched) {
-          return user;
-        }
-        return next(new CastError('Пользователь не найден'));
-      }))
+  UserSchema.findUserByCredentials( email, password )
   // все сошлось, теперь выдаем пользователю токен
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' });
@@ -46,7 +36,6 @@ function getUsers(req, res, next) {
 
 // ПОЛУЧЕНИЕ ПОЛЬЗОВАТЕЛЯ ПО ID
 function getUserById(req, res, next) {
-
   UserSchema.findById(req.params.userId)
     .then((user) => {
       if (!user) {
@@ -67,7 +56,8 @@ function getUserById(req, res, next) {
 // ПОЛУЧЕНИЕ ИНФЫ О ПОЛЬЗОВАТЕЛЕ
 function getUser(req, res, next) {
   const { _id } = req.user._id;
-  UserSchema.findById(_id).then((user) => {
+  UserSchema.findById(_id)
+  .then((user) => {
     // проверяем, есть ли пользователь с таким id
     if (!user) {
       next(new ValidationError('Пользователь  не найден'));
@@ -116,6 +106,7 @@ function patchUserInfo(req, res, next) {
     .then((user) => {
       if (!user) {
         next(new ValidationError('Пользователь с указанным _id не найден'));
+        return;
       }
     })
     .then(() => res.send(req.body))
@@ -138,6 +129,7 @@ function pathAvatar(req, res, next) {
     .then((user) => {
       if (!user) {
         next(new ValidationError('Пользователь с указанным _id не найден'));
+        return;
       }
     })
     .then(() => res.send(req.body))
@@ -149,6 +141,8 @@ function pathAvatar(req, res, next) {
       }
     });
 }
+
+
 
 module.exports = {
   getUser,

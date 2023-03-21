@@ -4,6 +4,13 @@ const auth = require('../middlewares/auth');
 const {
   getCards, createCard, deleteCard, putLike, deleteLike,
 } = require('../controllers/cardsControllers');
+const {
+  ValidationError
+} = require('../Errors/Errors');
+const idValidator = require('../validator/validator')
+
+
+
 
 router.get('/cards', auth, getCards);
 
@@ -18,16 +25,31 @@ router.post('/cards',
   createCard,
 );
 
-router.delete('/cards/:cardId', celebrate({
+router.delete('/cards/:cardId',
+celebrate({
   [Segments.PARAMS]: Joi.object().keys({
-    userId: Joi.string().length(24),
+    cardId: idValidator,
   }),
 }),
 auth,
  deleteCard);
 
-router.put('/cards/:cardId/likes', auth, putLike);
+router.put('/cards/:cardId/likes',
+celebrate({
+  [Segments.PARAMS]: Joi.object().keys({
+    cardId: idValidator,
+  }),
+}), auth, putLike);
 
-router.delete('/cards/:cardId/likes', auth, deleteLike);
+router.delete('/cards/:cardId/likes',
+celebrate({
+  [Segments.PARAMS]: Joi.object().keys({
+    cardId: idValidator,
+  }),
+}), auth, deleteLike);
+
+router.use('*', auth, (req, res, next) => {
+  next(new ValidationError('Страницы по данному адресу не существует'));
+});
 
 module.exports = router;
