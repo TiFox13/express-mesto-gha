@@ -25,7 +25,7 @@ app.use(usersRouter);
 app.use(cardsRouter);
 
 app.use('*', (req, res, next) => {
-  next(new ValidationError('Страницы по данному адресу не существует222'));
+  next(new ValidationError('Страницы по данному адресу не существует'));
 });
 
 app.use(errors());

@@ -41,7 +41,8 @@ function deleteCard(req, res, next) {
         return;
       }
       card.remove()
-        .then(() => res.send({ message: 'Карточка успешно удалена' }));
+        .then(() => res.send({ message: 'Карточка успешно удалена' }))
+        .catch(() => next(new InternalServerError()))
     })
     .catch((err) => {
       if (err.name === 'CastError') {
