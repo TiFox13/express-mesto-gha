@@ -10,7 +10,7 @@ const { Conflict } = require('../Errors/Conflict');
 function login(req, res, next) {
   const { email, password } = req.body;
   // ищем пользователя
-  UserSchema.findUserByCredentials(email, password)
+  return UserSchema.findUserByCredentials({ email, password })
     // все сошлось, теперь выдаем пользователю токен
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' });
@@ -20,7 +20,7 @@ function login(req, res, next) {
         token,
       });
     })
-    .catch(() => next(new InternalServerError()));
+    .catch(next);
 }
 
 // ПОЛУЧЕНИЕ ВСЕХ ПОЛЬЗОВАТЕЛЕЙ
@@ -53,8 +53,8 @@ function getUserById(req, res, next) {
 
 // ПОЛУЧЕНИЕ ИНФЫ О ПОЛЬЗОВАТЕЛЕ
 function getUser(req, res, next) {
-  const { _id } = req.user._id;
-  UserSchema.findById(_id)
+  const id = req.user._id;
+  UserSchema.findById(id)
     .then((user) => {
       // проверяем, есть ли пользователь с таким id
       if (!user) {
@@ -93,13 +93,10 @@ function createUser(req, res, next) {
 
 // ИЗМЕНЕНИЕ ИНФОРМАЦИИ О ПОЛЬЗОВАТЕЛЕ
 function patchUserInfo(req, res, next) {
+  const { name, about } = req.body;
   UserSchema.findByIdAndUpdate(
-    // req.user._id,
-    {
-      id: req.user._id,
-      name: req.body.name,
-      about: req.body.about,
-    },
+    req.user._id,
+    { name, about },
     { new: true, runValidators: true },
   )
     .then((user) => {
@@ -119,9 +116,10 @@ function patchUserInfo(req, res, next) {
 
 // ИЗМЕНЕНИЕ АВАТАРА
 function pathAvatar(req, res, next) {
+  const { avatar } = req.body;
   UserSchema.findByIdAndUpdate(
     req.user._id,
-    { avatar: req.body },
+    { avatar },
     { new: true, runValidators: true },
   )
     .then((user) => {
